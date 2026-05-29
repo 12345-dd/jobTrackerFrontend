@@ -12,7 +12,7 @@ const Signup = () => {
 
     const submitHandler = async (data) => {
         try {
-            const res = await axios.post("https://jobtrackerbackend-6gxo.onrender.com/signup", data);
+            const res = await axios.post("https://jobtrackerbackend-production-7e62.up.railway.app/signup", data);
             showSuccess("Registeration Successful");
             setTimeout(() => {
                 navigate("/login")

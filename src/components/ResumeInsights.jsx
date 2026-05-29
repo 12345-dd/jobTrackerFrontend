@@ -22,7 +22,7 @@ const ResumeInsights = () => {
 
   async function fetch() {
     try {
-      const res = await axios.get('https://jobtrackerbackend-6gxo.onrender.com/resume/insights', {
+      const res = await axios.get('https://jobtrackerbackend-production-7e62.up.railway.app/resume/insights', {
         headers: authHeader(),
       });
       setInsights(res.data.data);
@@ -43,7 +43,7 @@ const ResumeInsights = () => {
     form.append('resume', file);
 
     try {
-      await axios.post('https://jobtrackerbackend-6gxo.onrender.com/resume/upload', form, {
+      await axios.post('https://jobtrackerbackend-production-7e62.up.railway.app/resume/upload', form, {
         headers: { ...authHeader(), 'Content-Type': 'multipart/form-data' },
       });
       fetch();

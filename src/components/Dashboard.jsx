@@ -25,7 +25,7 @@ const Dashboard = () => {
 
   const fetchApp = async () => {
     try {
-      const res = await axios.get("https://jobtrackerbackend-6gxo.onrender.com/applications", { headers: authHeader() });
+      const res = await axios.get("https://jobtrackerbackend-production-7e62.up.railway.app/applications", { headers: authHeader() });
       setApps(res.data.data);
     } catch (err) {
       console.log(err);

@@ -13,7 +13,7 @@ const Login = () => {
 
     const submitHandler = async (data) => {
         try {
-            const res = await axios.post("https://jobtrackerbackend-6gxo.onrender.com/login", data);
+            const res = await axios.post("https://jobtrackerbackend-production-7e62.up.railway.app/login", data);
             setToken(res.data.token);
             showSuccess("Login Successful");
             setTimeout(() => {

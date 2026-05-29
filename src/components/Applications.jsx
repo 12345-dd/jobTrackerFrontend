@@ -32,7 +32,7 @@ const Applications = () => {
 
   const fetchApps = async () => {
     try {
-      const res = await axios.get("https://jobtrackerbackend-6gxo.onrender.com/applications", { headers: authHeader() });
+      const res = await axios.get("https://jobtrackerbackend-production-7e62.up.railway.app/applications", { headers: authHeader() });
       setApps(res.data.data);
     } catch (err) {
       showError(err, "Failed to fetch applications");
@@ -45,7 +45,7 @@ const Applications = () => {
 
   const submitHandler = async (data) => {
     try {
-      await axios.post("https://jobtrackerbackend-6gxo.onrender.com/applications", data, { headers: authHeader() });
+      await axios.post("https://jobtrackerbackend-production-7e62.up.railway.app/applications", data, { headers: authHeader() });
       showSuccess("Application Added Successfully");
       reset();
       fetchApps();
@@ -57,7 +57,7 @@ const Applications = () => {
 
   const updateStatus = async (id, status) => {
     try {
-      await axios.put(`https://jobtrackerbackend-6gxo.onrender.com/applications/${id}`, { status }, { headers: authHeader() });
+      await axios.put(`https://jobtrackerbackend-production-7e62.up.railway.app/applications/${id}`, { status }, { headers: authHeader() });
       showSuccess(`Status updated to ${status}`);
       fetchApps();
     } catch (err) {
@@ -68,7 +68,7 @@ const Applications = () => {
   const remove = async (id) => {
     if (!window.confirm("Delete this application?")) return;
     try {
-      await axios.delete(`https://jobtrackerbackend-6gxo.onrender.com/applications/${id}`, { headers: authHeader() });
+      await axios.delete(`https://jobtrackerbackend-production-7e62.up.railway.app/applications/${id}`, { headers: authHeader() });
       showSuccess("Application Deleted");
       fetchApps();
     } catch (err) {
