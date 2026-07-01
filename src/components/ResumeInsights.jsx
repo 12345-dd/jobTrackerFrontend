@@ -1,225 +1,426 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+
+import Navbar from "./Navbar";
+import { authHeader } from "../utils/auth";
+import { showError, showSuccess } from "../utils/toast";
+
 import {
-  Container,
-  Paper,
-  Typography,
-  Button,
   Box,
-  Grid,
+  Button,
   Chip,
-  Stack,
+  Container,
   Divider,
   LinearProgress,
+  Paper,
+  Stack,
   Tooltip,
-} from '@mui/material';
-import { authHeader } from '../utils/auth';
-import { showError, showSuccess } from '../utils/toast';
-import axios from 'axios';
+  Typography,
+} from "@mui/material";
+
+import Grid from "@mui/material/Grid";
+
+import CloudUploadRoundedIcon from "@mui/icons-material/CloudUploadRounded";
+import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
+import TipsAndUpdatesRoundedIcon from "@mui/icons-material/TipsAndUpdatesRounded";
 
 const ResumeInsights = () => {
   const [insights, setInsights] = useState([]);
 
-  async function fetch() {
+  const fetchInsights = async () => {
     try {
-      const res = await axios.get('https://jobtrackerbackend-production-7e62.up.railway.app/resume/insights', {
-        headers: authHeader(),
-      });
+      const res = await axios.get("https://jobtrackerbackend-production-7e62.up.railway.app/resume/insights",
+        {
+          headers: authHeader(),
+        }
+      );
+
       setInsights(res.data.data);
-    } catch (err) {
-      showError('Failed to fetch insights');
+    } catch {
+      showError("Failed to fetch insights");
     }
-  }
+  };
 
   useEffect(() => {
-    fetch();
+    fetchInsights();
   }, []);
 
-  async function upload(e) {
+  const upload = async (e) => {
     const file = e.target.files[0];
+
     if (!file) return;
 
     const form = new FormData();
-    form.append('resume', file);
+    form.append("resume", file);
 
     try {
-      await axios.post('https://jobtrackerbackend-production-7e62.up.railway.app/resume/upload', form, {
-        headers: { ...authHeader(), 'Content-Type': 'multipart/form-data' },
-      });
-      fetch();
-      showSuccess('Resume uploaded and processed successfully');
-    } catch (err) {
-      showError('Upload failed. Please try again.');
+      await axios.post("https://jobtrackerbackend-production-7e62.up.railway.app/resume/upload",
+        form,
+        {
+          headers: {
+            ...authHeader(),
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      showSuccess("Resume uploaded successfully");
+
+      fetchInsights();
+    } catch {
+      showError("Upload failed");
     }
-  }
+  };
 
   const getScoreLabel = (score) => {
-    if (score >= 80) return 'Excellent';
-    if (score >= 60) return 'Good';
-    if (score >= 40) return 'Average';
-    return 'Needs Improvement';
+    if (score >= 80) return "Excellent";
+    if (score >= 60) return "Good";
+    if (score >= 40) return "Average";
+    return "Needs Improvement";
   };
 
   return (
     <>
       <Navbar />
-      <Container sx={{ mt: 4, mb: 6 }}>
-        <Paper
-          elevation={3}
-          sx={{
-            p: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            backgroundColor: '#f9f9f9',
-          }}
-        >
-          <Typography variant="h5" fontWeight="bold">
-            Upload Your Resume
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            PDF format only. We'll analyze and provide insights.
-          </Typography>
-          <Button
-            variant="contained"
-            component="label"
-            sx={{ mt: 3 }}
-            color="primary"
+
+      <Box
+        sx={{
+          bgcolor: "#F8FAFC",
+          minHeight: "calc(100vh - 66px)",
+          py: 4,
+        }}
+      >
+        <Container maxWidth="xl">
+
+          <Paper
+            elevation={0}
+            sx={{
+              p: 5,
+              borderRadius: 4,
+              border: "1px solid #E2E8F0",
+              boxShadow: "0 8px 24px rgba(15,23,42,.06)",
+              background:
+                "linear-gradient(135deg,#2563EB,#1D4ED8)",
+              color: "#fff",
+              textAlign: "center",
+              mb: 4,
+            }}
           >
-            Choose File
-            <input type="file" accept="application/pdf" hidden onChange={upload} />
-          </Button>
-        </Paper>
+            <CloudUploadRoundedIcon
+              sx={{
+                fontSize: 60,
+                mb: 2,
+              }}
+            />
 
-        <Box sx={{ mt: 5 }}>
-          <Typography variant="h6" sx={{ mb: 2 }} fontWeight="medium">
-            Resume Insights
+            <Typography
+              variant="h5"
+              fontWeight={700}
+            >
+              Upload Resume
+            </Typography>
+
+            <Typography
+              sx={{
+                opacity: .9,
+                mt: 1,
+                mb: 4,
+              }}
+            >
+              Upload your PDF resume to analyze keyword coverage, calculate a resume score, and receive actionable improvement suggestions.
+            </Typography>
+
+            <Button
+              variant="contained"
+              component="label"
+              sx={{
+                bgcolor: "#fff",
+                color: "#2563EB",
+                px: 4,
+                py: 1.4,
+                borderRadius: 3,
+                textTransform: "none",
+                fontWeight: 700,
+
+                "&:hover": {
+                  bgcolor: "#F8FAFC",
+                },
+              }}
+            >
+              Choose PDF
+
+              <input
+                hidden
+                accept="application/pdf"
+                type="file"
+                onChange={upload}
+              />
+            </Button>
+          </Paper>
+
+          <Typography
+            variant="h5"
+            fontWeight={700}
+            mb={3}
+          >
+            Analysis Results
           </Typography>
 
-          {insights.length === 0 ? (
-            <Typography color="text.secondary">
-              No insights available. Upload a resume to get started.
-            </Typography>
-          ) : (
-            <Grid container spacing={3}>
-              {insights.map((ins) => (
-                <Grid item xs={12} md={6} key={ins._id}>
-                  <Paper
-                    elevation={3}
+          <Grid
+            container
+            spacing={3}
+          >
+            {insights.length === 0 ? (
+              <Grid size={12}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 6,
+                    borderRadius: 4,
+                    border: "1px solid #E2E8F0",
+                    textAlign: "center",
+                    boxShadow: "0 8px 24px rgba(15,23,42,.06)",
+                  }}
+                >
+                  <DescriptionRoundedIcon
                     sx={{
-                      p: 3,
-                      borderRadius: 2,
-                      backgroundColor: '#ffffff',
-                      position: 'relative',
+                      fontSize: 60,
+                      color: "#94A3B8",
+                      mb: 2,
+                    }}
+                  />
+
+                  <Typography
+                    variant="h6"
+                    fontWeight={700}
+                  >
+                    No Resume Insights Yet
+                  </Typography>
+
+                  <Typography
+                    color="text.secondary"
+                    mt={1}
+                  >
+                    Upload your resume to receive feedback.
+                  </Typography>
+                </Paper>
+              </Grid>
+            ) : (
+              insights.map((ins) => (
+                <Grid
+                  key={ins._id}
+                  size={{ xs: 12, lg: 6 }}
+                >
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 4,
+                      borderRadius: 4,
+                      border: "1px solid #E2E8F0",
+                      boxShadow: "0 8px 24px rgba(15,23,42,.06)",
+                      transition: ".25s",
+
+                      "&:hover": {
+                        transform: "translateY(-5px)",
+                      },
                     }}
                   >
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="subtitle2" fontWeight="medium">
-                        Resume Score: {ins.resumeScore || 0}%
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 2,
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        fontWeight={700}
+                      >
+                        Resume Score
                       </Typography>
-                      <Tooltip title={getScoreLabel(ins.resumeScore || 0)}>
-                        <LinearProgress
-                          variant="determinate"
-                          value={ins.resumeScore || 0}
-                          sx={{
-                            height: 10,
-                            borderRadius: 5,
-                            mt: 1,
-                            backgroundColor: '#e0e0e0',
-                            '& .MuiLinearProgress-bar': {
-                              backgroundColor:
-                                ins.resumeScore > 80
-                                  ? '#4caf50'
-                                  : ins.resumeScore > 60
-                                  ? '#ffb74d'
-                                  : ins.resumeScore > 40
-                                  ? '#ff9800'
-                                  : '#f44336',
-                            },
-                          }}
-                        />
-                      </Tooltip>
+
+                      <Chip
+                        label={`${ins.resumeScore || 0}%`}
+                        color={
+                          ins.resumeScore >= 80
+                            ? "success"
+                            : ins.resumeScore >= 60
+                            ? "primary"
+                            : ins.resumeScore >= 40
+                            ? "warning"
+                            : "error"
+                        }
+                      />
                     </Box>
 
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Uploaded: {new Date(ins.createdAt).toLocaleString()}
+                    <Tooltip
+                      title={getScoreLabel(ins.resumeScore || 0)}
+                    >
+                      <LinearProgress
+                        variant="determinate"
+                        value={ins.resumeScore || 0}
+                        sx={{
+                          height: 12,
+                          borderRadius: 10,
+                          mb: 2,
+                          backgroundColor: "#E2E8F0",
+
+                          "& .MuiLinearProgress-bar": {
+                            borderRadius: 10,
+                            backgroundColor:
+                              ins.resumeScore >= 80
+                                ? "#10B981"
+                                : ins.resumeScore >= 60
+                                ? "#2563EB"
+                                : ins.resumeScore >= 40
+                                ? "#F59E0B"
+                                : "#EF4444",
+                          },
+                        }}
+                      />
+                    </Tooltip>
+
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                    >
+                      Uploaded on{" "}
+                      {new Date(
+                        ins.createdAt
+                      ).toLocaleString()}
                     </Typography>
 
-                    <Divider sx={{ my: 1 }} />
+                    <Divider sx={{ my: 3 }} />
 
-                    <Box sx={{ mt: 1, mb: 1 }}>
-                      <Typography variant="subtitle2" fontWeight="medium">
-                        Keywords Found:
-                      </Typography>
+                    <Box mb={3}>
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        gap={1}
+                        mb={2}
+                      >
+                        <CheckCircleRoundedIcon
+                          color="success"
+                        />
+
+                        <Typography
+                          fontWeight={700}
+                        >
+                          Keywords Found
+                        </Typography>
+                      </Box>
+
                       <Stack
                         direction="row"
                         spacing={1}
                         flexWrap="wrap"
-                        sx={{ mt: 0.5 }}
+                        useFlexGap
                       >
-                        {ins.keywordsFound.length > 0 ? (
-                          ins.keywordsFound.map((kw, index) => (
+                        {ins.keywordsFound.length ? (
+                          ins.keywordsFound.map((item, index) => (
                             <Chip
                               key={index}
-                              label={kw}
+                              label={item}
                               color="success"
-                              size="small"
+                              sx={{ mb: 1 }}
                             />
                           ))
                         ) : (
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography
+                            color="text.secondary"
+                          >
                             None
                           </Typography>
                         )}
                       </Stack>
                     </Box>
 
-                    <Box sx={{ mt: 1, mb: 1 }}>
-                      <Typography variant="subtitle2" fontWeight="medium">
-                        Missing Keywords:
-                      </Typography>
+                    <Box mb={3}>
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        gap={1}
+                        mb={2}
+                      >
+                        <ErrorOutlineRoundedIcon
+                          color="warning"
+                        />
+
+                        <Typography
+                          fontWeight={700}
+                        >
+                          Missing Keywords
+                        </Typography>
+                      </Box>
+
                       <Stack
                         direction="row"
                         spacing={1}
                         flexWrap="wrap"
-                        sx={{ mt: 0.5 }}
+                        useFlexGap
                       >
-                        {ins.missingKeywords.length > 0 ? (
-                          ins.missingKeywords.slice(0, 6).map((kw, index) => (
-                            <Chip
-                              key={index}
-                              label={kw}
-                              color="warning"
-                              size="small"
-                            />
-                          ))
+                        {ins.missingKeywords.length ? (
+                          ins.missingKeywords
+                            .slice(0, 8)
+                            .map((item, index) => (
+                              <Chip
+                                key={index}
+                                label={item}
+                                color="warning"
+                                sx={{ mb: 1 }}
+                              />
+                            ))
                         ) : (
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography
+                            color="text.secondary"
+                          >
                             None
                           </Typography>
                         )}
                       </Stack>
                     </Box>
 
-                    <Box sx={{ mt: 1 }}>
-                      <Typography variant="subtitle2" fontWeight="medium">
-                        Suggestions:
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.primary"
-                        sx={{ mt: 0.5 }}
+                    <Box
+                      sx={{
+                        bgcolor: "#EFF6FF",
+                        borderRadius: 3,
+                        p: 3,
+                      }}
+                    >
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        gap={1}
+                        mb={1}
                       >
-                        {ins.suggestions || 'No suggestions provided.'}
+                        <TipsAndUpdatesRoundedIcon
+                          color="primary"
+                        />
+
+                        <Typography
+                          fontWeight={700}
+                        >
+                          Suggestions
+                        </Typography>
+                      </Box>
+
+                      <Typography
+                        color="#334155"
+                      >
+                        {ins.suggestions ||
+                          "No suggestions available."}
                       </Typography>
                     </Box>
                   </Paper>
                 </Grid>
-              ))}
-            </Grid>
-          )}
-        </Box>
-      </Container>
+              ))
+            )}
+          </Grid>
+        </Container>
+      </Box>
     </>
   );
 };
